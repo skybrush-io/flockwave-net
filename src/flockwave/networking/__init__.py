@@ -7,6 +7,8 @@ from typing import Any, Dict, Optional, Sequence, Tuple
 import platform
 import socket
 
+from .version import __version__
+
 __all__ = (
     "canonicalize_mac_address",
     "create_socket",
@@ -21,6 +23,7 @@ __all__ = (
     "is_mac_address_unicast",
     "is_mac_address_universal",
     "resolve_network_interface_or_address",
+    "__version__",
 )
 
 
