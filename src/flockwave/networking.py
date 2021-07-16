@@ -5,6 +5,7 @@ from netifaces import AF_INET, AF_INET6, AF_LINK, gateways, ifaddresses, interfa
 from typing import Dict, Optional, Sequence, Tuple, TYPE_CHECKING
 
 import platform
+import socket
 
 if TYPE_CHECKING:
     import trio.socket
@@ -76,29 +77,23 @@ def enable_tcp_keepalive(
         max_fails: maximum number of failures allowed before terminating the
             TCP connection
     """
-    sock.setsockopt(trio.socket.SOL_SOCKET, trio.socket.SO_KEEPALIVE, 1)
+    sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
-    if hasattr(trio.socket, "TCP_KEEPIDLE"):
-        print("A")
-        sock.setsockopt(
-            trio.socket.IPPROTO_TCP, trio.socket.TCP_KEEPIDLE, after_idle_sec
-        )
+    if hasattr(socket, "TCP_KEEPIDLE"):
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, after_idle_sec)
     elif platform.system() == "Darwin":
         # This is for macOS
         try:
             TCP_KEEPALIVE = 0x10  # scraped from the Darwin headers
-            sock.setsockopt(trio.socket.IPPROTO_TCP, TCP_KEEPALIVE, after_idle_sec)
-        except Exception as ex:
-            print(repr(ex))
+            sock.setsockopt(socket.IPPROTO_TCP, TCP_KEEPALIVE, after_idle_sec)
+        except Exception:
             pass
 
-    if hasattr(trio.socket, "TCP_KEEPINTVL"):
-        sock.setsockopt(
-            trio.socket.IPPROTO_TCP, trio.socket.TCP_KEEPINTVL, interval_sec
-        )
+    if hasattr(socket, "TCP_KEEPINTVL"):
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPINTVL, interval_sec)
 
-    if hasattr(trio.socket, "TCP_KEEPCNT"):
-        sock.setsockopt(trio.socket.IPPROTO_TCP, trio.socket.TCP_KEEPCNT, max_fails)
+    if hasattr(socket, "TCP_KEEPCNT"):
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPCNT, max_fails)
 
 
 def find_interfaces_with_address(address: str) -> Sequence[Tuple[str, str]]:
