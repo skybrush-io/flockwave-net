@@ -2,13 +2,10 @@
 
 from ipaddress import ip_address, ip_network, IPv6Address, IPv6Network
 from netifaces import AF_INET, AF_INET6, AF_LINK, gateways, ifaddresses, interfaces
-from typing import Dict, Optional, Sequence, Tuple, TYPE_CHECKING
+from typing import Any, Dict, Optional, Sequence, Tuple
 
 import platform
 import socket
-
-if TYPE_CHECKING:
-    import trio.socket
 
 __all__ = (
     "canonicalize_mac_address",
@@ -35,7 +32,7 @@ def canonicalize_mac_address(address: str) -> str:
     return address.strip().lower().replace("-", ":")
 
 
-def create_socket(socket_type) -> "trio.socket.SocketType":
+def create_socket(socket_type) -> Any:
     """Creates an asynchronous socket with the given type.
 
     Asynchronous sockets have asynchronous sender and receiver methods so
