@@ -13,6 +13,7 @@ from .interfaces import (
     get_link_layer_address_mapping,
     resolve_network_interface_or_address,
 )
+from .scanner import NetworkScanner
 from .sockets import (
     create_socket,
     enable_tcp_keepalive,
@@ -20,6 +21,8 @@ from .sockets import (
     get_socket_address,
 )
 from .version import __version__
+from .wired import is_carrier_detected, is_maybe_wired_or_wireless
+from .wireless import get_connected_access_point_name, is_likely_wireless
 
 __all__ = (
     "canonicalize_mac_address",
@@ -30,10 +33,15 @@ __all__ = (
     "format_socket_address",
     "get_address_of_network_interface",
     "get_all_ipv4_addresses",
+    "get_connected_access_point_name",
     "get_link_layer_address_mapping",
     "get_socket_address",
+    "is_carrier_detected",
+    "is_likely_wireless",
     "is_mac_address_unicast",
     "is_mac_address_universal",
+    "is_maybe_wired_or_wireless",
     "resolve_network_interface_or_address",
+    "NetworkScanner",
     "__version__",
 )
