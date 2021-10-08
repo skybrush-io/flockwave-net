@@ -11,6 +11,7 @@ __all__ = (
     "find_interfaces_in_network",
     "get_address_of_network_interface",
     "get_all_ipv4_addresses",
+    "get_broadcast_address_of_network_interface",
     "get_link_layer_address_mapping",
     "resolve_network_interface_or_address",
 )
