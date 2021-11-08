@@ -1,11 +1,18 @@
 import platform
 import socket
 
+from errno import EADDRINUSE
 from ipaddress import ip_address, ip_network
 from netifaces import AF_INET, gateways, ifaddresses, interfaces
 from typing import Any, Optional, Tuple
 
-__all__ = ("create_socket", "enable_tcp_keepalive", "get_socket_address")
+__all__ = (
+    "can_bind_to_tcp_address",
+    "can_bind_to_udp_address",
+    "create_socket",
+    "enable_tcp_keepalive",
+    "get_socket_address",
+)
 
 
 def create_socket(socket_type) -> Any:
@@ -35,6 +42,50 @@ def create_socket(socket_type) -> Any:
         # terminates
         sock.setsockopt(trio.socket.SOL_SOCKET, trio.socket.SO_REUSEPORT, 1)
     return sock
+
+
+async def can_bind_to_tcp_address(address: Tuple[str, int]) -> bool:
+    """Returns whether a new socket could bind to the given TCP hostname-port
+    pair. This is done by actually creating a new socket and trying to bind to
+    the address. The socket is closed and disposed of after the function returns.
+
+    Parameters:
+        address: the TCP address to bind to as a hostname-port pair
+
+    Returns:
+        whether a new socket could bind to the given hostname-port pair
+    """
+    import trio.socket
+
+    return await _can_bind_to_type_and_address(trio.socket.SOCK_STREAM, address)
+
+
+async def can_bind_to_udp_address(address: Tuple[str, int]) -> bool:
+    """Returns whether a new socket could bind to the given UDP hostname-port
+    pair. This is done by actually creating a new socket and trying to bind to
+    the address. The socket is closed and disposed of after the function returns.
+
+    Parameters:
+        address: the UDP address to bind to as a hostname-port pair
+
+    Returns:
+        whether a new socket could bind to the given hostname-port pair
+    """
+    import trio.socket
+
+    return await _can_bind_to_type_and_address(trio.socket.SOCK_DGRAM, address)
+
+
+async def _can_bind_to_type_and_address(socket_type, address: Any) -> bool:
+    sock = create_socket(socket_type)
+    try:
+        await sock.bind(address)
+    except OSError as ex:
+        if ex.errno == EADDRINUSE:
+            return False
+        else:
+            raise
+    return True
 
 
 def enable_tcp_keepalive(

@@ -16,6 +16,8 @@ from .interfaces import (
 )
 from .scanner import NetworkScanner
 from .sockets import (
+    can_bind_to_tcp_address,
+    can_bind_to_udp_address,
     create_socket,
     enable_tcp_keepalive,
     format_socket_address,
@@ -26,6 +28,8 @@ from .wired import is_carrier_detected, is_maybe_wired_or_wireless
 from .wireless import get_connected_access_point_name, is_likely_wireless
 
 __all__ = (
+    "can_bind_to_tcp_address",
+    "can_bind_to_udp_address",
     "canonicalize_mac_address",
     "create_socket",
     "enable_tcp_keepalive",
@@ -34,6 +38,7 @@ __all__ = (
     "format_socket_address",
     "get_address_of_network_interface",
     "get_all_ipv4_addresses",
+    "get_broadcast_address_of_network_interface",
     "get_connected_access_point_name",
     "get_link_layer_address_mapping",
     "get_socket_address",
