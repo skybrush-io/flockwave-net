@@ -4,7 +4,6 @@ from enum import Enum
 from functools import partial
 from ipaddress import ip_address
 from netifaces import AF_INET, AF_LINK, ifaddresses, interfaces
-from trio import to_thread
 from typing import (
     Callable,
     Dict,
@@ -124,6 +123,7 @@ class NetworkScanner:
     async def run(self) -> None:
         try:
             from aio_net_events import NetworkEventDetector
+            from trio import to_thread
         except ImportError:
             raise RuntimeError(
                 "you need to install the 'async' extra to use this class"
