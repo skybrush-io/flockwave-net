@@ -11,7 +11,7 @@ packages = [
 python = "^3.7"
 netifaces = ">=0.11.0"
 trio = { version = "^0.19.0", optional = true }
-aio-net-events = { version = "^2.0.0", optional = true }
+aio-net-events = { version = "^3.0.0", optional = true }
 
 [tool.poetry.dev-dependencies]
 pytest = "^6.2.5"
