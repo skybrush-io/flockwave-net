@@ -1,6 +1,7 @@
 import platform
 import socket
 
+from contextlib import closing
 from errno import EADDRINUSE
 from ipaddress import ip_address, ip_network
 from netifaces import AF_INET, gateways, ifaddresses, interfaces
@@ -78,13 +79,14 @@ async def can_bind_to_udp_address(address: Tuple[str, int]) -> bool:
 
 async def _can_bind_to_type_and_address(socket_type, address: Any) -> bool:
     sock = create_socket(socket_type)
-    try:
-        await sock.bind(address)
-    except OSError as ex:
-        if ex.errno == EADDRINUSE:
-            return False
-        else:
-            raise
+    with closing(sock):
+        try:
+            await sock.bind(address)
+        except OSError as ex:
+            if ex.errno == EADDRINUSE:
+                return False
+            else:
+                raise
     return True
 
 
