@@ -2,7 +2,7 @@
 
 from ipaddress import ip_address, ip_network, IPv6Address, IPv6Network
 from netifaces import AF_INET, AF_INET6, AF_LINK, ifaddresses, interfaces
-from typing import Dict, Sequence, Tuple
+from typing import Sequence
 
 from .addressing import canonicalize_mac_address
 
@@ -17,7 +17,7 @@ __all__ = (
 )
 
 
-def find_interfaces_with_address(address: str) -> Sequence[Tuple[str, str]]:
+def find_interfaces_with_address(address: str) -> Sequence[tuple[str, str]]:
     """Finds the network interfaces of the current machine that contain the given
     address in their network.
 
@@ -49,7 +49,7 @@ def find_interfaces_with_address(address: str) -> Sequence[Tuple[str, str]]:
     return candidates
 
 
-def find_interfaces_in_network(network: str) -> Sequence[Tuple[str, str, str]]:
+def find_interfaces_in_network(network: str) -> Sequence[tuple[str, str, str]]:
     """Finds the network interfaces of the current machine that have at
     least one address that belongs to the given network.
 
@@ -152,7 +152,7 @@ def get_broadcast_address_of_network_interface(
         raise ValueError(f"interface {value} has no broadcast address")
 
 
-def get_link_layer_address_mapping() -> Dict[str, str]:
+def get_link_layer_address_mapping() -> dict[str, str]:
     """Returns a dictionary mapping interface names to their corresponding
     link-layer (MAC) addresses.
 

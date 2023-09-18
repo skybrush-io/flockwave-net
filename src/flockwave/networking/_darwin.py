@@ -1,14 +1,14 @@
 from subprocess import run
 from time import monotonic
-from typing import Dict, Optional
+from typing import Optional
 
 __all__ = ("get_network_interface_to_device_map",)
 
 _network_interface_to_device_map_last_checked_at: Optional[float] = None
-_network_interface_to_device_map_cached: Optional[Dict[str, str]] = None
+_network_interface_to_device_map_cached: Optional[dict[str, str]] = None
 
 
-def get_network_interface_to_device_map() -> Dict[str, str]:
+def get_network_interface_to_device_map() -> dict[str, str]:
     """Returns a (cached) mapping from network interface identifiers to the
     names of the corresponding network devices on macOS.
     """

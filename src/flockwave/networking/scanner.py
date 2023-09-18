@@ -6,13 +6,10 @@ from ipaddress import ip_address
 from netifaces import AF_INET, AF_LINK, ifaddresses, interfaces
 from typing import (
     Callable,
-    Dict,
-    List,
     Iterable,
     Iterator,
     Optional,
     Sequence,
-    Tuple,
     Union,
 )
 
@@ -42,7 +39,7 @@ class NetworkScanResultItem:
     connected: bool = False
 
     #: List of IPv4 addresses, netmasks and broadcast addresses of the interface
-    addresses: Sequence[Dict[str, Union[str, int]]] = field(default_factory=list)
+    addresses: Sequence[dict[str, Union[str, int]]] = field(default_factory=list)
 
     #: Name of the AP that the wireless interface is connected to, if known
     access_point_name: Optional[str] = None
@@ -55,11 +52,11 @@ class NetworkScanResultItem:
         addresses = self.get_networks_and_netmasks()
         return addresses[0] if addresses else None
 
-    def get_networks_and_netmasks(self) -> List[str]:
+    def get_networks_and_netmasks(self) -> list[str]:
         """Returns the list of IPv4 addresses and netmasks of the interface in
         slashed notation.
         """
-        result: List[str] = []
+        result: list[str] = []
         for address in self.addresses:
             addr = address.get("addr") or "-"
             netmask = address.get("netmask")
@@ -76,10 +73,10 @@ class NetworkScanResultItem:
 
 
 #: Type specification for the result of a network scan
-NetworkScanResult = List[NetworkScanResultItem]
+NetworkScanResult = list[NetworkScanResultItem]
 
 
-def _is_loopback(item: Dict[str, Union[int, str]]) -> bool:
+def _is_loopback(item: dict[str, Union[int, str]]) -> bool:
     return ip_address(item.get("addr")).is_loopback
 
 
@@ -89,7 +86,7 @@ class NetworkScanner:
     machine is currently connected to.
     """
 
-    _handlers: List[Callable[[NetworkScanResult], None]]
+    _handlers: list[Callable[[NetworkScanResult], None]]
     _last_result: Optional[NetworkScanResult]
 
     def __init__(self) -> None:
@@ -159,7 +156,7 @@ class NetworkScanner:
 
     def _find_relevant_interfaces(
         self,
-    ) -> Iterable[Tuple[str, Sequence[Dict[str, Union[str, int]]]]]:
+    ) -> Iterable[tuple[str, Sequence[dict[str, Union[str, int]]]]]:
         """Finds the list of network interfaces that might be relevant to us
         in the sense that they probably represent a wired or wireless IPv4
         interface.
@@ -170,7 +167,7 @@ class NetworkScanner:
             address)
         """
         for interface in interfaces():
-            addresses: Dict[int, List[Dict[str, Union[str, int]]]] = ifaddresses(
+            addresses: dict[int, list[dict[str, Union[str, int]]]] = ifaddresses(
                 interface
             )
             ipv4_addresses = addresses.get(AF_INET)
@@ -196,7 +193,7 @@ class NetworkScanner:
         except ValueError:
             pass
 
-    def _scan_interfaces(self) -> List[NetworkScanResultItem]:
+    def _scan_interfaces(self) -> list[NetworkScanResultItem]:
         """Scans the network interfaces of the current device and tries to
         figure our the wired and wireless IP addresses of the device as well
         as the name of the wireless AP that the device is connected to.

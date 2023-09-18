@@ -5,7 +5,7 @@ from contextlib import closing
 from errno import EADDRINUSE
 from ipaddress import ip_address, ip_network
 from netifaces import AF_INET, gateways, ifaddresses, interfaces
-from typing import Any, Optional, Tuple
+from typing import Any, Optional
 
 __all__ = (
     "can_bind_to_tcp_address",
@@ -45,7 +45,7 @@ def create_socket(socket_type) -> Any:
     return sock
 
 
-async def can_bind_to_tcp_address(address: Tuple[str, int]) -> bool:
+async def can_bind_to_tcp_address(address: tuple[str, int]) -> bool:
     """Returns whether a new socket could bind to the given TCP hostname-port
     pair. This is done by actually creating a new socket and trying to bind to
     the address. The socket is closed and disposed of after the function returns.
@@ -61,7 +61,7 @@ async def can_bind_to_tcp_address(address: Tuple[str, int]) -> bool:
     return await _can_bind_to_type_and_address(trio.socket.SOCK_STREAM, address)
 
 
-async def can_bind_to_udp_address(address: Tuple[str, int]) -> bool:
+async def can_bind_to_udp_address(address: tuple[str, int]) -> bool:
     """Returns whether a new socket could bind to the given UDP hostname-port
     pair. This is done by actually creating a new socket and trying to bind to
     the address. The socket is closed and disposed of after the function returns.
@@ -123,7 +123,7 @@ def enable_tcp_keepalive(
 
 
 def format_socket_address(
-    sock, format: str = "{host}:{port}", in_subnet_of: Optional[Tuple[str, int]] = None
+    sock, format: str = "{host}:{port}", in_subnet_of: Optional[tuple[str, int]] = None
 ) -> str:
     """Formats the address that the given socket is bound to in the
     standard hostname-port format.
@@ -147,8 +147,8 @@ def format_socket_address(
 
 
 def get_socket_address(
-    sock, in_subnet_of: Optional[Tuple[str, int]] = None
-) -> Tuple[str, int]:
+    sock, in_subnet_of: Optional[tuple[str, int]] = None
+) -> tuple[str, int]:
     """Gets the hostname and port that the given socket is bound to.
 
     Parameters:
