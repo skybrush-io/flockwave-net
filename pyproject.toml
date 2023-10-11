@@ -10,9 +10,9 @@ license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.9"
-netifaces-plus = ">=0.11.0"
+netifaces-plus = ">=0.12.1"
 trio = { version = ">=0.19.0", optional = true }
-aio-net-events = { version = "^6.0.0", optional = true }
+aio-net-events = { version = "^6.0.1", optional = true }
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.1.1"
