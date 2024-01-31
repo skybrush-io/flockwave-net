@@ -124,7 +124,7 @@ class NetworkScanner:
         except ImportError:
             raise RuntimeError(
                 "you need to install the 'async' extra to use this class"
-            )
+            ) from None
 
         detector = NetworkEventDetector()
         async with aclosing(detector.events()) as network_events:
