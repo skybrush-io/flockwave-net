@@ -1,8 +1,14 @@
 """Generic networking-related utility functions."""
 
-from ipaddress import ip_address, ip_network, IPv6Address, IPv6Network
+from ipaddress import (
+    ip_address,
+    ip_network,
+    IPv4Network,
+    IPv6Address,
+    IPv6Network,
+)
 from netifaces import AF_INET, AF_INET6, AF_LINK, ifaddresses, interfaces
-from typing import Sequence
+from typing import Optional, Sequence, Union
 
 from .addressing import canonicalize_mac_address
 
@@ -17,7 +23,9 @@ __all__ = (
 )
 
 
-def find_interfaces_with_address(address: str) -> Sequence[tuple[str, str]]:
+def find_interfaces_with_address(
+    address: str,
+) -> Sequence[tuple[str, Union[IPv4Network, IPv6Network]]]:
     """Finds the network interfaces of the current machine that contain the given
     address in their network.
 
@@ -29,13 +37,13 @@ def find_interfaces_with_address(address: str) -> Sequence[tuple[str, str]]:
         belongs to the given network, the name of the network interface itself and
         the network of the interface, in a tuple
     """
-    address = ip_address(address)
+    address_obj = ip_address(address)
     if isinstance(address, IPv6Address):
         family = AF_INET6
     else:
         family = AF_INET
 
-    candidates = []
+    candidates: list[tuple[str, Union[IPv4Network, IPv6Network]]] = []
     for interface in interfaces():
         specs = ifaddresses(interface).get(family) or []
         ip_addresses_in_network = (
@@ -43,13 +51,15 @@ def find_interfaces_with_address(address: str) -> Sequence[tuple[str, str]]:
         )
         for if_address, netmask in ip_addresses_in_network:
             network = ip_network(f"{if_address}/{netmask}", strict=False)
-            if address in network:
+            if address_obj in network:
                 candidates.append((interface, network))
 
     return candidates
 
 
-def find_interfaces_in_network(network: str) -> Sequence[tuple[str, str, str]]:
+def find_interfaces_in_network(
+    network: str,
+) -> Sequence[tuple[str, str, Optional[str]]]:
     """Finds the network interfaces of the current machine that have at
     least one address that belongs to the given network.
 
@@ -62,19 +72,19 @@ def find_interfaces_in_network(network: str) -> Sequence[tuple[str, str, str]]:
         itself, the matched address and the network of the interface, in
         a tuple
     """
-    network = ip_network(network)
-    if isinstance(network, IPv6Network):
+    network_obj = ip_network(network)
+    if isinstance(network_obj, IPv6Network):
         family = AF_INET6
     else:
         family = AF_INET
 
-    candidates = []
+    candidates: list[tuple[str, str, Optional[str]]] = []
     for interface in interfaces():
         specs = ifaddresses(interface).get(family) or []
         ip_addresses_in_network = (
-            (spec.get("addr"), spec.get("netmask"))
+            (spec.get("addr") or "", spec.get("netmask"))
             for spec in specs
-            if ip_address(str(spec.get("addr"))) in network
+            if ip_address(str(spec.get("addr"))) in network_obj
         )
         for address, netmask in ip_addresses_in_network:
             candidates.append(
