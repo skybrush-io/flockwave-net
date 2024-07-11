@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flockwave-net"
-version = "7.0.2"
+version = "7.0.3"
 description = "Networking related functions for apps based on the Flockwave framework"
 authors = ["Tamas Nepusz <tamas@collmot.com>"]
 packages = [
