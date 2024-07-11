@@ -3,7 +3,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from functools import partial
 from ipaddress import ip_address
-from netifaces import AF_INET, AF_LINK, ifaddresses, interfaces
+from netifaces import AF_INET, AF_LINK, ifaddresses
 from typing import (
     Callable,
     Iterable,
@@ -12,6 +12,7 @@ from typing import (
     Sequence,
 )
 
+from .interfaces import list_network_interfaces
 from .utils import aclosing
 from .wired import is_carrier_detected, is_maybe_wired_or_wireless
 from .wireless import get_connected_access_point_name, is_likely_wireless
@@ -166,7 +167,7 @@ class NetworkScanner:
             its IPv4 addresses (or an empty list if the interface has no IPv4
             address)
         """
-        for interface in interfaces():
+        for interface in list_network_interfaces():
             addresses = ifaddresses(interface)
             ipv4_addresses = addresses.get(AF_INET)
             if not ipv4_addresses:

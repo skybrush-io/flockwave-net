@@ -4,8 +4,10 @@ import socket
 from contextlib import closing
 from errno import EADDRINUSE
 from ipaddress import ip_address, ip_network
-from netifaces import AF_INET, gateways, ifaddresses, interfaces
+from netifaces import AF_INET, gateways, ifaddresses
 from typing import Any, Optional
+
+from .interfaces import list_network_interfaces
 
 __all__ = (
     "can_bind_to_tcp_address",
@@ -187,7 +189,7 @@ def get_socket_address(
             remote_host = None
 
         if remote_host:
-            for interface in interfaces():
+            for interface in list_network_interfaces():
                 # We are currently interested only in IPv4 addresses
                 specs = ifaddresses(interface).get(AF_INET)
                 if not specs:

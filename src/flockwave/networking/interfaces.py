@@ -1,5 +1,7 @@
 """Generic networking-related utility functions."""
 
+import sys
+
 from ipaddress import (
     ip_address,
     ip_network,
@@ -7,7 +9,7 @@ from ipaddress import (
     IPv6Address,
     IPv6Network,
 )
-from netifaces import AF_INET, AF_INET6, AF_LINK, ifaddresses, interfaces
+from netifaces import AF_INET, AF_INET6, AF_LINK, ifaddresses, interfaces as _interfaces
 from typing import Optional, Sequence, Union
 
 from .addressing import canonicalize_mac_address
@@ -19,8 +21,22 @@ __all__ = (
     "get_all_ipv4_addresses",
     "get_broadcast_address_of_network_interface",
     "get_link_layer_address_mapping",
+    "list_network_interfaces",
     "resolve_network_interface_or_address",
 )
+
+_is_android = hasattr(sys, "getandroidapilevel")
+
+
+if _is_android:
+
+    def list_network_interfaces() -> Sequence[str]:
+        """Lists all the network interfaces of the system."""
+        # rmnet and r_rmnet interfaces on Android seem to cause a crash with
+        # netifaces.ifaddresses() so we pretend they do not exist
+        return [iface for iface in _interfaces() if "rmnet" not in iface]
+else:
+    list_network_interfaces = _interfaces
 
 
 def find_interfaces_with_address(
@@ -44,7 +60,7 @@ def find_interfaces_with_address(
         family = AF_INET
 
     candidates: list[tuple[str, Union[IPv4Network, IPv6Network]]] = []
-    for interface in interfaces():
+    for interface in list_network_interfaces():
         specs = ifaddresses(interface).get(family) or []
         ip_addresses_in_network = (
             (spec.get("addr"), spec.get("netmask")) for spec in specs
@@ -79,7 +95,7 @@ def find_interfaces_in_network(
         family = AF_INET
 
     candidates: list[tuple[str, str, Optional[str]]] = []
-    for interface in interfaces():
+    for interface in list_network_interfaces():
         specs = ifaddresses(interface).get(family) or []
         ip_addresses_in_network = (
             (spec.get("addr") or "", spec.get("netmask"))
@@ -130,7 +146,7 @@ def get_address_of_network_interface(value: str, family: int = AF_INET) -> str:
 def get_all_ipv4_addresses() -> Sequence[str]:
     """Returns all IPv4 addresses of the current machine."""
     result = []
-    for iface in interfaces():
+    for iface in list_network_interfaces():
         addresses = ifaddresses(iface)
         if AF_INET in addresses:
             result.append(addresses[AF_INET][0]["addr"])
@@ -169,7 +185,7 @@ def get_link_layer_address_mapping() -> dict[str, str]:
     We assume that one interface may have only one link-layer address.
     """
     result = {}
-    for iface in interfaces():
+    for iface in list_network_interfaces():
         addresses = ifaddresses(iface)
         if AF_LINK in addresses:
             result[iface] = canonicalize_mac_address(addresses[AF_LINK][0]["addr"])
@@ -190,6 +206,10 @@ def resolve_network_interface_or_address(value: str) -> str:
 
     Returns:
         the IPv4 address of the interface.
+
+    Raises:
+        ValueError: if the value seems to be a network interface name but it has
+            no IPv4 address
     """
     try:
         return str(ip_address(value))
