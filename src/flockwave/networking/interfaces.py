@@ -58,7 +58,7 @@ def find_interfaces_with_address(
 
 
 def find_interfaces_in_network(
-    network: str,
+    network: Union[str, IPv4Network, IPv6Network],
 ) -> Sequence[tuple[str, str, Optional[str]]]:
     """Finds the network interfaces of the current machine that have at
     least one address that belongs to the given network.

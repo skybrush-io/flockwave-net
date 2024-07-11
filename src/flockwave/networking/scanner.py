@@ -10,7 +10,6 @@ from typing import (
     Iterator,
     Optional,
     Sequence,
-    Union,
 )
 
 from .utils import aclosing
@@ -39,7 +38,7 @@ class NetworkScanResultItem:
     connected: bool = False
 
     #: List of IPv4 addresses, netmasks and broadcast addresses of the interface
-    addresses: Sequence[dict[str, Union[str, int]]] = field(default_factory=list)
+    addresses: Sequence[dict[str, str]] = field(default_factory=list)
 
     #: Name of the AP that the wireless interface is connected to, if known
     access_point_name: Optional[str] = None
@@ -76,8 +75,9 @@ class NetworkScanResultItem:
 NetworkScanResult = list[NetworkScanResultItem]
 
 
-def _is_loopback(item: dict[str, Union[int, str]]) -> bool:
-    return ip_address(item.get("addr")).is_loopback
+def _is_loopback(item: dict[str, str]) -> bool:
+    addr = item.get("addr")
+    return ip_address(addr).is_loopback if addr is not None else False
 
 
 class NetworkScanner:
@@ -156,7 +156,7 @@ class NetworkScanner:
 
     def _find_relevant_interfaces(
         self,
-    ) -> Iterable[tuple[str, Sequence[dict[str, Union[str, int]]]]]:
+    ) -> Iterable[tuple[str, Sequence[dict[str, str]]]]:
         """Finds the list of network interfaces that might be relevant to us
         in the sense that they probably represent a wired or wireless IPv4
         interface.
@@ -167,9 +167,7 @@ class NetworkScanner:
             address)
         """
         for interface in interfaces():
-            addresses: dict[int, list[dict[str, Union[str, int]]]] = ifaddresses(
-                interface
-            )
+            addresses = ifaddresses(interface)
             ipv4_addresses = addresses.get(AF_INET)
             if not ipv4_addresses:
                 # No IPv4 address. It might be a disconnected network
