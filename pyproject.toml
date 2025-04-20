@@ -1,6 +1,6 @@
 [project]
 name = "flockwave-net"
-version = "7.0.3"
+version = "8.0.0"
 description = "Networking related functions for apps based on the Flockwave framework"
 authors = [{ name = "Tamas Nepusz", email = "tamas@collmot.com>" }]
 license = "MIT"
