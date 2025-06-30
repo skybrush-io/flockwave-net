@@ -274,7 +274,6 @@ def _maximize_socket_buffer_size(sock, option) -> int:
         # Try to double the current size until we reach a point where we
         # cannot increase it further
         desired_size = 2 * current_size
-        print("Trying to set socket option {} to {}".format(option, desired_size))
         try:
             sock.setsockopt(socket.SOL_SOCKET, option, desired_size)
         except OSError:
@@ -285,4 +284,9 @@ def _maximize_socket_buffer_size(sock, option) -> int:
         if current_size < desired_size:
             # If the new size is not at least as large as the desired size, we
             # cannot increase it further, so we just leave it as is.
+            return current_size
+
+        # Stop at 16 MB to avoid excessive memory usage. For some reason,
+        # Windows allows doubling the size of the buffer indefinitely.
+        if current_size >= 16 * 1024 * 1024:
             return current_size
