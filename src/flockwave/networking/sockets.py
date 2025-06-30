@@ -15,6 +15,8 @@ __all__ = (
     "create_socket",
     "enable_tcp_keepalive",
     "get_socket_address",
+    "maximize_socket_receive_buffer_size",
+    "maximize_socket_send_buffer_size",
 )
 
 
@@ -108,7 +110,7 @@ def enable_tcp_keepalive(
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_KEEPALIVE, 1)
 
     if hasattr(socket, "TCP_KEEPIDLE"):
-        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, after_idle_sec)
+        sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_KEEPIDLE, after_idle_sec)  # type: ignore
     elif platform.system() == "Darwin":
         # This is for macOS
         try:
@@ -218,3 +220,68 @@ def get_socket_address(
                         break
 
     return host, port
+
+
+def maximize_socket_receive_buffer_size(sock) -> int:
+    """Maximizes the receive buffer size of the given socket.
+
+    This is useful for UDP sockets that receive large amounts of data while the
+    application is potentially busy doing something else.
+
+    Parameters:
+        sock: the socket for which we want to maximize the receive buffer size
+
+    Returns:
+        the new receive buffer size of the socket; zero if the socket does not
+        support getting socket options
+    """
+    return _maximize_socket_buffer_size(sock, socket.SO_RCVBUF)
+
+
+def maximize_socket_send_buffer_size(sock) -> int:
+    """Maximizes the send buffer size of the given socket.
+
+    This is useful for UDP sockets that receive large amounts of data while the
+    application is potentially busy doing something else.
+
+    Parameters:
+        sock: the socket for which we want to maximize the send buffer size
+
+    Returns:
+        the new send buffer size of the socket; zero if the socket does not
+        support getting socket options
+    """
+    return _maximize_socket_buffer_size(sock, socket.SO_SNDBUF)
+
+
+def _maximize_socket_buffer_size(sock, option) -> int:
+    """Maximizes the buffer size of the given socket for the given option."""
+    if option not in (socket.SO_RCVBUF, socket.SO_SNDBUF):
+        raise ValueError("Invalid socket option specified")
+
+    if not hasattr(sock, "getsockopt") or not hasattr(sock, "setsockopt"):
+        # No support for getting socket options. We cannot do much about it
+        # so we return zero
+        return 0
+
+    current_size = sock.getsockopt(socket.SOL_SOCKET, option)
+    if not hasattr(sock, "setsockopt"):
+        # No support for setting socket options. We cannot do much about it
+        # so we return the current size
+        return current_size
+
+    while True:
+        # Try to double the current size until we reach a point where we
+        # cannot increase it further
+        desired_size = 2 * current_size
+        try:
+            sock.setsockopt(socket.SOL_SOCKET, option, desired_size)
+        except OSError:
+            # If we cannot set the desired size, we cannot increase it further
+            return current_size
+
+        current_size = sock.getsockopt(socket.SOL_SOCKET, option)
+        if current_size < desired_size:
+            # If the new size is not at least as large as the desired size, we
+            # cannot increase it further, so we just leave it as is.
+            return current_size

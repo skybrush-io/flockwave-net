@@ -22,6 +22,8 @@ from .sockets import (
     enable_tcp_keepalive,
     format_socket_address,
     get_socket_address,
+    maximize_socket_receive_buffer_size,
+    maximize_socket_send_buffer_size,
 )
 from .version import __version__
 from .wired import is_carrier_detected, is_maybe_wired_or_wireless
@@ -47,6 +49,8 @@ __all__ = (
     "is_mac_address_unicast",
     "is_mac_address_universal",
     "is_maybe_wired_or_wireless",
+    "maximize_socket_receive_buffer_size",
+    "maximize_socket_send_buffer_size",
     "resolve_network_interface_or_address",
     "NetworkScanner",
     "__version__",
