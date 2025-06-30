@@ -274,6 +274,7 @@ def _maximize_socket_buffer_size(sock, option) -> int:
         # Try to double the current size until we reach a point where we
         # cannot increase it further
         desired_size = 2 * current_size
+        print("Trying to set socket option {} to {}".format(option, desired_size))
         try:
             sock.setsockopt(socket.SOL_SOCKET, option, desired_size)
         except OSError:
